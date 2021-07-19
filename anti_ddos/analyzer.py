@@ -4,6 +4,7 @@
 
 import threading
 import time
+import os
 
 
 class Analyzer:
@@ -15,6 +16,7 @@ class Analyzer:
         self.raw_queue = base.raw_queue
         self.basic_analyze_result_queue = base.basic_analyze_result_queue
         self.complex_analyze_result = base.complex_analyze_result
+        self.settings = base.settings
 
     def basic_analyze(self):
 
@@ -139,6 +141,17 @@ class Analyzer:
             self.complex_analyze_result[connection_id]["total_traffic"] += line["what"]["length"]
             self.complex_analyze_result[connection_id]["recent_traffic"][line["what"]["timestamp"]] = line["what"]["length"]
             self.complex_analyze_result[connection_id]["now_speed"] = self.compute_now_speed(connection_id)
+
+            # compute now connection
+            if dst == self.settings["host"]:
+                connections = os.popen("netstat -ntu | awk '{print $5}' | cut -d: -f1 | uniq -c | sort -n | awk '{print $1}'").read().split("\n")[1:-1]
+                address = os.popen("netstat -ntu | awk '{print $5}' | cut -d: -f1 | uniq -c | sort -n | awk '{print $2}").read().split("\n")[1:-1]
+                if src in address:
+                    self.complex_analyze_result[connection_id]["connection_count"] = connections[address.index(src)]
+                else:
+                    self.complex_analyze_result[connection_id]["connection_count"] = None
+            else:
+                self.complex_analyze_result[connection_id]["connection_count"] = None
 
     def run(self):
 
