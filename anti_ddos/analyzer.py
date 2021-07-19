@@ -28,6 +28,7 @@ class Analyzer:
         line = self.raw_queue.get()
         while line != "":
             time.sleep(0.1)
+            self.log.add_log("Analyzer: now: %s" % line, 0)
             count += 1
             #             if count == len(data):
             #                 break
@@ -53,7 +54,11 @@ class Analyzer:
             output["who"]["dst"], output["who"]["dst_port"] = b[0], b[1]
             #         print(src_ip, src_port)
             #         print(dst_ip, dst_port)
-            output["what"]["timestamp"] = part1[0]
+
+            date = time.strftime("%Y-%m-%d", time.localtime()) + " " + part1[0]
+            time_array = time.strptime(date, "%Y-%m-%d %H:%M:%S")
+            output["what"]["timestamp"] = str(time.mktime(time_array))
+
             for j in part2:
                 if "Flags" in j:
                     output["what"]["flags"] = j.split(" ")[1]
@@ -69,6 +74,32 @@ class Analyzer:
             self.basic_analyze_result_queue.put(output)
             line = self.raw_queue.get()
 
+    def compute_now_speed(self, connection_id):
+
+        """
+        计算当前速度
+        :param connection_id: 要计算的这个连接的id
+        desc: 维持最近2s的数据，以此计算每秒速度
+        :return:
+        """
+        connection_data = self.complex_analyze_result[connection_id]
+        recent_traffic = connection_data["recent_traffic"]
+        a = list(recent_traffic.keys())
+        difference = abs(float(recent_traffic[1]) - float(recent_traffic[-1]))
+
+        if difference < 1 or len(recent_traffic) < 3:
+            speed = None
+        else:
+            total = 0
+            for i in a:
+                total += recent_traffic[i]
+            speed = total/difference
+            del self.complex_analyze_result[connection_id]["recent_traffic"][
+                list(recent_traffic.keys())[1]
+            ]
+
+        return speed
+
     def advanced_analyze(self):
 
         """
@@ -82,12 +113,10 @@ class Analyzer:
             "src": "",
             "dst": "",
             "total_traffic": "",
-            "in_traffic": "",
-            "out_traffic": "",
             "now_speed": "",
             "connection_count": "",
             "records": [],
-
+            "recent_traffic": {}
         }
 
         now_connection_ids = list(self.complex_analyze_result.keys())
@@ -102,12 +131,14 @@ class Analyzer:
             if connection_id not in now_connection_ids:
                 now_connection_ids.append(connection_id)
                 self.complex_analyze_result[connection_id] = record_template
-
             self.complex_analyze_result[connection_id]["records"].insert(0, line)
             self.complex_analyze_result[connection_id]["src"] = src
-            self.complex_analyze_result[connection_id]["dst"] = src
+            self.complex_analyze_result[connection_id]["dst"] = dst
 
-
+            # ---------------compute base status---------------
+            self.complex_analyze_result[connection_id]["total_traffic"] += line["what"]["length"]
+            self.complex_analyze_result[connection_id]["recent_traffic"][line["what"]["timestamp"]] = line["what"]["length"]
+            self.complex_analyze_result[connection_id]["now_speed"] = self.compute_now_speed(connection_id)
 
     def run(self):
 
