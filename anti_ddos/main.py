@@ -29,7 +29,8 @@ class Base:
         }
 
         self.settings = {
-            "network_card": "enp34s0"
+            "network_card": "enp34s0",
+            "host": "192.168.3.156"
         }
 
 
