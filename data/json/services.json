@@ -1,0 +1,22 @@
+{
+    "system_services": {
+        "httpd": ["systemctl start httpd"],
+        "nginx": ["/usr/local/nginx/objs/nginx -c /usr/local/nginx/conf/nginx.conf"],
+        "docker": ["systemctl start docker"],
+        "etherpad": ["docker run focused_tesla"]
+        "onlyoffice": ["docker run gracious_fermi"],
+        "lychee": ["docker run amazing_meitner"],
+        "jupyterlab": ["sh /home/hadream/sh/run_jl.sh"],
+        "aria2": ["sh /home/hadream/sh/run_aria2_2.sh"],
+        "netstat": ["systemctl start netstat"],
+        "GTI": ["sh /home/develop_disk/Guess_The_Idiom/run.sh"],
+        "emby": ["systemctl start emby"],
+        "npc": ["/home/hadream/nps/run_npc.sh"]
+    },
+    "web_services": {
+        "httpd": [("80", "82")],
+        "nginx": ["81", "84"],
+        "emby": ["8096"],
+        "jupyerlab": ["9999"]
+    }
+}
