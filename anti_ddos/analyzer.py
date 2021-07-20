@@ -124,13 +124,16 @@ class Analyzer:
         now_connection_ids = list(self.complex_analyze_result.keys())
         line = self.basic_analyze_result_queue.get()
         while line != "":
+            is_new = False
             time.sleep(0.15)
+
             src = line["who"]["src"] + ":" + line["who"]["src_port"]
             dst = line["who"]["dst"] + ":" + line["who"]["dst_port"]
             connection_id = src + " > " + dst
             # ---------------classify---------------
             self.log.add_log("Analyzer: AA stage 1, classify c_id-%s" % connection_id, 1)
             if connection_id not in now_connection_ids:
+                is_new = True
                 now_connection_ids.append(connection_id)
                 self.complex_analyze_result[connection_id] = record_template
             self.complex_analyze_result[connection_id]["records"].insert(0, line)
@@ -142,7 +145,16 @@ class Analyzer:
             self.complex_analyze_result[connection_id]["recent_traffic"][line["what"]["timestamp"]] = line["what"]["length"]
             self.complex_analyze_result[connection_id]["now_speed"] = self.compute_now_speed(connection_id)
 
-            # compute now connection
+            self.complex_analyze_result["overall"]["recent_traffic"][line["what"]["timestamp"]] = line["what"]["length"]
+            self.complex_analyze_result[connection_id]["now_speed"] = self.compute_now_speed("overall")
+            self.complex_analyze_result["overall"]["total_traffic"] += line["what"]["length"]
+            if dst == self.settings["host"]: # in traffic
+                self.complex_analyze_result["overall"]["in_traffic"] += line["what"]["length"]
+            elif src == self.settings["host"]: # out traffic
+                self.complex_analyze_result["overall"]["out_traffic"] += line["what"]["length"]
+
+            # count now ip connections
+            # single ip
             if dst == self.settings["host"]:
                 connections = os.popen("netstat -ntu | awk '{print $5}' | cut -d: -f1 | uniq -c | sort -n | awk '{print $1}'").read().split("\n")[1:-1]
                 address = os.popen("netstat -ntu | awk '{print $5}' | cut -d: -f1 | uniq -c | sort -n | awk '{print $2}").read().split("\n")[1:-1]
@@ -152,6 +164,37 @@ class Analyzer:
                     self.complex_analyze_result[connection_id]["connection_count"] = None
             else:
                 self.complex_analyze_result[connection_id]["connection_count"] = None
+            # overall(2s之内新建的ip连接将被重点关注）
+            if is_new:
+                if not self.complex_analyze_result["overall"]["new_connections"]:
+                    self.complex_analyze_result["overall"]["new_connections"] = []
+                    self.complex_analyze_result["overall"]["new_connections"].append(connection_id)
+                else:
+                    difference = abs(float(self.complex_analyze_result[self.complex_analyze_result["overall"]["new_connections"][0]]["what"]["timestamp"]) - \
+                        float(self.complex_analyze_result[connection_id]["what"]["timestamp"]))
+                    if difference > 2:
+                        del self.complex_analyze_result["overall"]["new_connections"][0:]
+                    else:
+                        del self.complex_analyze_result["overall"]["new_connections"][0]
+                    self.complex_analyze_result["overall"]["new_connections"].append(connection_id)
+                    if len(self.complex_analyze_result["overall"]["new_connections"]) >= self.settings["new_connections_limit"]:
+                        self.log.add_log("Analyzer: new_connections was over the limit", 2)
+                        self.complex_analyze_result["overall"]["new_connections_warning"] = True
+                        self.complex_analyze_result["overall"]["under_tracking_connections"].append(self.complex_analyze_result["overall"]["new_connections"])
+                        del self.complex_analyze_result["overall"]["new_connections"][0:]
+
+            # delete outdated records
+            record_length = len(self.complex_analyze_result[connection_id]["records"])
+            if record_length > 60:
+                now_timestamp = time.time()
+                node = None
+                for index in range(0, record_length):
+                    if now_timestamp - float(self.complex_analyze_result[connection_id]["records"][index]["what"]["timestamp"]) >= 20:
+                        node = index
+                        break
+                if node != 0:
+                    for index in range(node, record_length+1):
+                        del self.complex_analyze_result[connection_id]["records"][index]
 
     def run(self):
 
