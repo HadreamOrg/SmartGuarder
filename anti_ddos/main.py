@@ -21,7 +21,17 @@ class Base:
 
         self.raw_queue = queue.Queue()
         self.basic_analyze_result_queue = queue.Queue()
-        self.complex_analyze_result = {}
+        self.complex_analyze_result = {
+            "overall": {
+                "total_traffic": "",
+                "in_traffic": "",
+                "out_traffic": "",
+                "recent_traffic": {},
+                "new_connections": None,
+                "new_connections_warning": False,
+                "under_tracking_connections": []
+            }
+        }
         self.public_event = {
             "toMonitor": [],
             "toAnalyzer": [],
@@ -30,7 +40,8 @@ class Base:
 
         self.settings = {
             "network_card": "enp34s0",
-            "host": "192.168.3.156"
+            "host": "192.168.3.156",
+            "new_connections_limit": 12
         }
 
 
