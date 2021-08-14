@@ -1,0 +1,153 @@
+{
+  "servicesList": [
+    "NPC", "NGINX", "HTTPD", "DOCKER", "NETDATA", "JUPYTERLAB", "ARIA2", "MARKIDEA",
+    "CONVOS", "GTI", "ERGO-IRC", "TUBE", "WALLABAG", "LYCHEE", "ETHERPAD", "SYNC", "BACKUP_SCRIPT"
+  ],
+  "NPC":
+    {
+      "serviceName":  "NPC",
+      "serviceType": "backend",
+      "serviceChkCom": "ps -ef | grep npc",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "cd /home/hadream/npc/ && sh ./run_npc.sh"
+      }
+    },
+  "NGINX":
+    {
+      "serviceName":  "NGINX",
+      "serviceType": "web_server",
+      "serviceChkCom": "ps -ef | grep nginx",
+      "serviceOpe": {
+        "opeList": ["start", "restart", "stop"],
+        "start": "/usr/local/nginx/objs/nginx",
+        "restart": "/usr/local/nginx/objs/nginx -s reload",
+        "stop": "/usr/local/nginx/objs/nginx -s stop"
+      }
+    },
+  "JUPYTERLAB":
+    {
+      "serviceName":  "JUPYTERLAB",
+      "serviceType": "listen-web",
+      "serviceChkCom": "ps -ef | grep jupyter",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "sh /home/hadream/sh/run_jl.sh"
+      }
+    },
+  "ARIA2":
+    {
+      "serviceName":  "ARIA2",
+      "serviceType": "listen-rpc",
+      "serviceChkCom": "ps -ef | grep aria2c",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "sh /home/hadream/sh/run_jl.sh"
+      }
+    },
+  "MARKIDEA":
+    {
+      "serviceName":  "MARKIDEA",
+      "serviceType": "java",
+      "serviceChkCom": "ps -ef | grep note-0.4.5.jar",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "sh /home/hadream/sh/run_markidea.sh"
+      }
+    },
+  "CONVOS":
+    {
+      "serviceName":  "CONVOS",
+      "serviceType": "listen-web",
+      "serviceChkCom": "ps -ef | grep convos",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "sh /home/hadream/sh/run_convos.sh"
+      }
+    },
+  "GTI":
+    {
+      "serviceName":  "GTI",
+      "serviceType": "listen-api",
+      "serviceChkCom": "ps -ef | grep Server.py",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "cd /home/develop_disk/Guess_The_Idiom/ && sh ./run.sh"
+      }
+    },
+  "ERGO-IRC":
+    {
+      "serviceName":  "ERGO-IRC",
+      "serviceType": "docker",
+      "serviceChkCom": "docker ps",
+      "serviceOpe": {
+        "opeList": ["start", "stop"],
+        "start": "docker start ergo_irc",
+        "stop": "docker stop ergo_irc"
+      }
+    },
+  "TUBE":
+    {
+      "serviceName":  "TUBE",
+      "serviceType": "docker",
+      "serviceChkCom": "docker ps",
+      "serviceOpe": {
+        "opeList": ["start", "stop"],
+        "start": "docker start tube",
+        "stop": "docker stop tube"
+      }
+    },
+  "WALLABAG":
+    {
+      "serviceName":  "WALLABAG",
+      "serviceType": "docker",
+      "serviceChkCom": "docker ps",
+      "serviceOpe": {
+        "opeList": ["start", "stop"],
+        "start": "docker start wallabag-db && docker start wallabag",
+        "stop": "docker stop wallabag && docker stop wallabag-db"
+      }
+    },
+  "LYCHEE":
+    {
+      "serviceName":  "LYCHEE",
+      "serviceType": "docker",
+      "serviceChkCom": "docker ps",
+      "serviceOpe": {
+        "opeList": ["start", "stop"],
+        "start": "docker start tube",
+        "stop": "docker stop tube"
+      }
+    },
+  "ETHERPAD":
+    {
+      "serviceName":  "ETHERPAD",
+      "serviceType": "docker",
+      "serviceChkCom": "docker ps",
+      "serviceOpe": {
+        "opeList": ["start", "stop"],
+        "start": "docker start etherpad",
+        "stop": "docker stop etherpad"
+      }
+    },
+  "SYNC":
+    {
+      "serviceName":  "SYNC",
+      "serviceType": "listen-web",
+      "serviceChkCom": "ps -ef | grep sync",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "nohup /home/hadream/syncthing/syncthing > /home/hadream/logs/syncthing.log 2>&1 &"
+      }
+    },
+  "BACKUP_SCRIPT":
+    {
+      "serviceName":  "BACKUP_SCRIPT",
+      "serviceType": "under",
+      "serviceChkCom": "ps -ef | grep backup.py",
+      "serviceOpe": {
+        "opeList": ["start"],
+        "start": "cd /home/develop_disk/AAA_System/backup/ && nohup python3 backup.py > /home/hadream/logs/backup.log 2>&1 &"
+      }
+    }
+}

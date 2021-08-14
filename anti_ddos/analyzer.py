@@ -107,16 +107,23 @@ class Analyzer:
         """
         对粗加工过后的数据进行归类、分析、计算
         desc:
-            高级分析包括「对ip连接分类、出入分类、」「更新每个连接和总情况的实时速度与总流量」「ip连接总数/变化（ip的，每个ip的）」「删除过时数据」
+            高级分析包括「对ip连接分类、出入分类、」「更新每个连接和总情况的实时速度与总流量」「对连接类型/数量进行标记/统计」「记录当前连接状态」「ip连接总数/变化（ip的，每个ip的）」「删除过时数据」
         :return:
         """
         self.log.add_log("Analyzer: start advanced analyzing", 1)
         record_template = {
             "src": "",
             "dst": "",
+            "status": "",  # handshaking1/2/3 data_transportation fin rst
+            "protocol": "",
             "total_traffic": "",
             "now_speed": "",
             "connection_count": "",
+            "handshake_status_count": {
+                "1": "",
+                "2": "",
+                "3": ""
+            },
             "records": [],
             "recent_traffic": {}
         }
