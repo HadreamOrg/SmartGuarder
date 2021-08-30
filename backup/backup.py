@@ -15,7 +15,7 @@ VERSION_LASTING_COUNT = 5
 BACKUP_DIC = "/home/storage_disk/backup"
 
 DOCKER_NAME_LIST = ["ergo_irc", "wallabag", "wallabag-db", "tube", "lychee", "etherpad", "netdata"]
-STORAGE_DISK_BACKUP_DIC_LIST = ["chevereto", "nginx_sharing", "wget", "aria2", "Emby"]
+STORAGE_DISK_BACKUP_DIC_LIST = ["chevereto_images", "nginx_sharing", "wget", "aria2"]
 ###
 
 
@@ -54,7 +54,7 @@ def backup_database():
     file_path = "/www/backup/database"
     file_list = os.listdir(file_path)
     for file in file_list:
-        log.add_log("BackupDatabase: now processing: %s" % file, 0)
+        log.add_log("BackupDatabase: now processing: %s" % file, 1)
         execute("cp %s/%s %s/database/%s" % (file_path, file, BACKUP_DIC, file))
         execute("rm -rf %s/%s" % (file_path, file))
 
@@ -74,10 +74,13 @@ def backup_website():
     file_path = "/www/backup/site"
     file_list = os.listdir(file_path)
     for file in file_list:
-        log.add_log("BackupWebsite: now processing: %s" % file, 0)
+        log.add_log("BackupWebsite: now processing: %s" % file, 1)
         execute("cp %s/%s %s/website/%s" % (file_path, file, BACKUP_DIC, file))
         execute("rm -rf %s/%s" % (file_path, file))
 
+    # nextcloud backup
+    # log.add_log("BackupWebsite: now processing: nextcloud", 1)
+    # execute("tar -czvf /home/storage_disk/backup/website/web_nextcloud_backup.tar.gz /home/www/nextcloud/ --exclude=/home/www/nextcloud/data ")
 
 def backup_docker():
     """

@@ -60,20 +60,19 @@ class Log():
         """
         return time.strftime("%H:%M:%S")
 
-    def add_log(self, content, level, is_print=True, is_period=True):
+    def add_log(self, content, level, is_print=True):
 
         """
         添加log
         :param level: log级别  0: DEBUG 1: INFO 2: WARNING 3: ERROR(当前任务可能停止) 4: FATAL: 主线程退出
         :param content: log内容
         :param is_print: 是否打印
-        :param is_period: 是否添加句号
         :return:
         """
         log = "[" + self.logLevelList[level] + "] " + self.get_formatted_time() + " " + content
 
-        if is_period:
-            log = log + " ."
+        # if is_period:
+        #     log = log + " ."
         if is_print:
             if level >= self.log_setting["displayLevel"]:
                 print(log)
